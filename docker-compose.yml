@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: blog
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "01155464886"
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    command: >
+      sh -c "while ! nc -z db 5432; do sleep 1; done;
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      SECRET_KEY: "django-insecure-komvvm+rm02(qk0y-pmm4!ukf@5hn1(y!g!2wl8ocdt(hob%=p"
+      DB_NAME: blog
+      DB_USER: postgres
+      DB_PASSWORD: "01155464886"
+      DB_HOST: db
+      DB_PORT: 5432
+
+volumes:
+  postgres_data:
